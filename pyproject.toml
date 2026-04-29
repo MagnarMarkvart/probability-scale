@@ -1,0 +1,14 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "probability-scale"
+version = "0.1.0"
+requires-python = ">=3.11"
+description = "Probability scale demo with Statistics Estonia APIs and Plotly"
+readme = "README.md"
+license = { text = "MIT" }
+
+[tool.setuptools.packages.find]
+where = ["src"]

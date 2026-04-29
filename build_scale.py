@@ -1,9 +1,10 @@
 """
-Käivita projekti juurest:
+Run from the project root (after ``pip install -e .``):
 
     python build_scale.py
 
-Voog: datasrc (API → DataFrame) → compote (üks tabel) → plotting (Plotly HTML).
+Pipeline: ``probability_scale.data`` (API → DataFrame) → ``compote`` (one table)
+→ ``probability_scale.plotting`` (Plotly HTML).
 """
 
 from __future__ import annotations
@@ -22,23 +23,35 @@ def main() -> int:
         except OSError:
             pass
 
-    from datasrc.compote import build_scale_table
-    from plotting.probability_scale import build_figure, write_html
+    from probability_scale.data.compote import build_scale_table
+    from probability_scale.plotting import build_figure, write_html
+
+    import pandas as pd
 
     table = build_scale_table()
-    year = str(table["Aasta"].iloc[0])
-    pct = float(table["value"].iloc[0])
-    prob = float(table["probability"].iloc[0])
-    print(f"Kompotis ({year}): {pct}% → tõenäosus: {prob}")
+
+    year_cols = [c for c in ("Aasta", "Vaatlusperiood") if c in table.columns]
+    year = str(max(table[c].astype(str).max() for c in year_cols)) if year_cols else "output"
+
+    for _, row in table.iterrows():
+        src = row.get("source", "?")
+        tag = (
+            f" [{row['rl21801_metric']}]"
+            if "rl21801_metric" in row.index and pd.notna(row["rl21801_metric"])
+            else ""
+        )
+        prob = float(row["probability"])
+        extra = f" value={row['value']}" if "value" in row and pd.notna(row["value"]) else ""
+        print(f"{src}{tag}: probability={prob}{extra}")
     table_path = OUTPUT_DIR / f"scale_table_{year}.csv"
     table.to_csv(table_path, index=False, encoding="utf-8")
-    print(f"Salvestatud: {table_path}")
+    print(f"Saved: {table_path}")
 
     fig = build_figure(table)
     html_path = OUTPUT_DIR / f"probability_scale_{year}.html"
     write_html(fig, html_path)
-    print(f"Salvestatud: {html_path}")
-    print("Juhend: docs/plotly_juhend.md (muuda Python faile, mitte HTML-i)")
+    print(f"Saved: {html_path}")
+    print("Tip: change the Python sources to adjust the chart; avoid editing the generated HTML.")
 
     return 0
 

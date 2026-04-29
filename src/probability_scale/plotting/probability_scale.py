@@ -1,7 +1,7 @@
 """
-Tõenäosusskaala — Plotly seadistus ja joonis.
+Probability scale — Plotly configuration and figure builder.
 
-MUUDA SIIN: telje sildid, värvid, pealkiri, markerite suurus.
+EDIT HERE: axis labels, colors, title, marker size.
 """
 
 from __future__ import annotations
@@ -10,12 +10,12 @@ import pandas as pd
 import plotly.graph_objects as go
 
 # ---------------------------------------------------------------------------
-# 1) X-telg: vahemik ja sildid
+# 1) X axis: range and tick labels
 # ---------------------------------------------------------------------------
 
-X_AXIS_TITLE = "Tõenäosus"
+X_AXIS_TITLE = "Probability"
 
-# tickvals = mis kohtadel joonisel „nööbid“; ticktext = mis teksti näidatakse
+# tickvals = x positions of ticks; ticktext = labels shown at those positions
 TICK_VALUES = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
 TICK_LABELS = [
     "0",
@@ -31,23 +31,23 @@ TICK_LABELS = [
     "1",
 ]
 
-FIGURE_TITLE = "Tõenäosusskaala"
+FIGURE_TITLE = "Probability scale"
 
 MARKER = dict(size=22, color="#1f5f8b", line=dict(width=2, color="white"))
 
 # ---------------------------------------------------------------------------
-# 2) Abifunktsioonid
+# 2) Helpers
 # ---------------------------------------------------------------------------
 
 
 def _require_columns(df: pd.DataFrame) -> None:
     missing = {"probability", "event_label"} - set(df.columns)
     if missing:
-        raise ValueError(f"DataFrame'il puuduvad veerud: {sorted(missing)}")
+        raise ValueError(f"DataFrame is missing columns: {sorted(missing)}")
 
 
 def x_axis_config() -> dict:
-    """Tagastab Plotly xaxis sõnastiku — kasutatakse `update_layout(xaxis=...)` sees."""
+    """Return a Plotly ``xaxis`` dict for use inside ``update_layout(xaxis=...)``."""
     return dict(
         title=dict(text=X_AXIS_TITLE),
         range=[0, 1],
@@ -61,11 +61,11 @@ def x_axis_config() -> dict:
 
 
 def build_figure(df: pd.DataFrame) -> go.Figure:
-    """Üks või mitu punkti: iga rida = üks marker x = probability."""
+    """One or more points: each row is one marker at x = probability."""
     _require_columns(df)
     probs = df["probability"].astype(float)
     if ((probs < 0) | (probs > 1)).any():
-        raise ValueError("Mõni `probability` jääb väljapoole [0, 1]")
+        raise ValueError("Some `probability` values fall outside [0, 1]")
 
     labels = df["event_label"].astype(str)
     xs = probs.tolist()
@@ -81,7 +81,7 @@ def build_figure(df: pd.DataFrame) -> go.Figure:
                 marker=MARKER,
                 customdata=customdata,
                 hovertemplate=(
-                    "<b>Tõenäosus</b> (kümnend): %{customdata[0]:.4f}<br>"
+                    "<b>Probability</b> (decimal): %{customdata[0]:.4f}<br>"
                     "%{customdata[1]}<extra></extra>"
                 ),
             )
@@ -107,7 +107,7 @@ def build_figure(df: pd.DataFrame) -> go.Figure:
 
 
 def write_html(fig: go.Figure, path: str | "Path", *, include_plotlyjs: str = "cdn") -> None:
-    """Salvestab interaktiivse HTML-i. `include_plotlyjs='cdn'` = väiksem fail (vajab netti)."""
+    """Write an interactive HTML file. ``include_plotlyjs='cdn'`` yields a smaller file (needs network)."""
     from pathlib import Path
 
     p = Path(path)

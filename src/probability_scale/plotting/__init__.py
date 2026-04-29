@@ -1,13 +1,12 @@
 """
-Plotly tõenäosusskaala — ainult joonise välimus.
+Plotly probability scale — chart appearance and layout.
 
-Põhiloogika on moodulis ``probability_scale``. Siit saab importida
-peamised funktsioonid ja konstandid lühemalt:
+Main helpers live in ``probability_scale.plotting.probability_scale``:
 
-    from plotting import build_figure, write_html
+    from probability_scale.plotting import build_figure, write_html
 """
 
-from plotting.probability_scale import (
+from .probability_scale import (
     FIGURE_TITLE,
     MARKER,
     TICK_LABELS,

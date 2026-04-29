@@ -1,4 +1,17 @@
 .venv/
+*.egg-info/
 __pycache__/
 *.pyc
 .pytest_cache/
+
+# Generated chart/table (re-run build_scale.py); keep committed example image
+output/scale_table_*.csv
+output/probability_scale_*.html
+
+dist/
+build/
+*.egg
+.env
+.env.*
+.DS_Store
+Thumbs.db
